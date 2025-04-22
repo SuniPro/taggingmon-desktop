@@ -1,0 +1,12 @@
+{
+  "name": "desktop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "ssh:moong": "bash ./bin/ssh-add-moong.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
