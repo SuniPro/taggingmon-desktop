@@ -1,5 +1,5 @@
 {
-  "name": "desktop",
+  "name": "taggingmon",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,8 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "tauri:dev": "pnpm tauri dev"
   },
   "dependencies": {
     "@react-router/node": "^7.5.3",
@@ -20,7 +21,7 @@
   },
   "devDependencies": {
     "@react-router/dev": "^7.5.3",
-    "@tailwindcss/vite": "^4.0.0",
+    "@tailwindcss/vite": "^4.1.4",
     "@tauri-apps/cli": "^2.5.0",
     "@types/node": "^20",
     "@types/react": "^19.0.1",
@@ -28,7 +29,7 @@
     "react-router-devtools": "^1.1.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
-    "vite": "^5.4.11",
+    "vite": "^6.3.3",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }
