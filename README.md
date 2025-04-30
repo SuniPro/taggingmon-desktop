@@ -17,10 +17,16 @@
 1. `pnpm i`
 2. `pnpm tauri:dev`
 
+> [!NOTE]
+> 프론트 화면만 빌드 후, preview 할 시, [serve](https://www.npmjs.com/package/serve) 설치 필요
+
 <br />
 
 ## Build
 
+`pnpm tauri:build`
+
+- `pnpm build`가 자동으로 사전 실행 됨
 - 빌드 앱 경로: `src-tauri/target/release/bundle`
 
 <br />

@@ -6,7 +6,7 @@
     "ssh:moong": "bash ./bin/ssh-add-moong.sh",
     "build": "react-router build",
     "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
+    "preview": "serve ./build/client",
     "typecheck": "react-router typegen && tsc",
     "tauri": "tauri",
     "tauri:dev": "pnpm tauri dev",
