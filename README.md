@@ -16,3 +16,9 @@
 
 1. `pnpm i`
 2. `pnpm tauri:dev`
+
+<br />
+
+## Build
+
+- 빌드 앱 경로: `src-tauri/target/release/bundle`
