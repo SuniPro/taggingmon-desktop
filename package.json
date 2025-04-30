@@ -9,7 +9,8 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "tauri": "tauri",
-    "tauri:dev": "pnpm tauri dev"
+    "tauri:dev": "pnpm tauri dev",
+    "tauri:build": "pnpm tauri build"
   },
   "dependencies": {
     "@react-router/node": "^7.5.3",
