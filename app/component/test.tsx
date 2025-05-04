@@ -1,5 +1,5 @@
 export const Test = () => {
-  console.log("lender Test Component");
+	console.log('lender Test Component');
 
-  return <div>Test component</div>;
+	return <div>Test component</div>;
 };
