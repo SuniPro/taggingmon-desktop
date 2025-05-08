@@ -2,6 +2,13 @@
 
 - node: `22.14.0`
 - pnpm: `9.13.2`
+- cargo: `1.86.0`
+
+### IOS
+
+- xcode: `15.4`
+- cocoapods: `1.16.2_1`
+- xcodegen: `2.43.0`
 
 <br />
 
