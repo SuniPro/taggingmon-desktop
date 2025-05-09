@@ -1,6 +1,9 @@
 {
 	// formatting
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"[rust]": {
+		"editor.defaultFormatter": "rust-lang.rust-analyzer"
+	},
 
 	// tailwindcss
 	"tailwindCSS.classAttributes": ["class", "className", "classNames"],

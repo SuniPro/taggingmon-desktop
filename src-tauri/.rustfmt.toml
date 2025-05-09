@@ -1,0 +1,2 @@
+hard_tabs = false # 공백을 사용할지 여부 (true면 탭 문자, false면 공백)
+tab_spaces = 2
