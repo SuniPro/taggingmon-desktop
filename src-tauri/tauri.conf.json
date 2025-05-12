@@ -1,6 +1,6 @@
 {
 	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-	"productName": "taggingmon",
+	"productName": "Taggingmon",
 	"version": "0.1.0",
 	"identifier": "com.taggingmon",
 	"build": {
@@ -12,7 +12,7 @@
 	"app": {
 		"windows": [
 			{
-				"title": "taggingmon",
+				"title": "Taggingmon",
 				"width": 800,
 				"height": 600,
 				"resizable": true,
