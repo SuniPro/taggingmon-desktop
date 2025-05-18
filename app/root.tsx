@@ -1,6 +1,7 @@
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import type { Route } from './+types/root';
+import { useMenuMacOS } from './hook/use-menu-macos';
 import './theme/index.css';
 
 export const links: Route.LinksFunction = () => [
@@ -35,6 +36,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+	useMenuMacOS();
+
 	return <Outlet />;
 }
 

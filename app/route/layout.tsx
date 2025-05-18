@@ -1,3 +1,4 @@
+import { Button } from '@heroui/button';
 import { memo, useEffect } from 'react';
 import { Outlet } from 'react-router';
 import { Test } from '~/component/test';
@@ -29,6 +30,10 @@ const Layout = memo(() => {
 
 	return (
 		<div>
+			<div className="titlebar absolute inset-0 h-8 w-full bg-white/10 select-none" data-tauri-drag-region />
+
+			<Button className="mx-auto block w-fit">BB</Button>
+
 			<div>layout</div>
 			<Outlet />
 			<Test />
