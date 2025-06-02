@@ -1,0 +1,52 @@
+---
+title: TGM ERD
+---
+
+erDiagram
+    FileFolder {
+        INT id PK "ID"
+        VARCHAR path "파일/폴더 경로"
+        VARCHAR name "이름"
+        BOOLEAN is_folder "폴더 여부"
+    }
+
+    FileFolderBasicInfo {
+        INT file_folder_id PK,FK "FileFolder ID"
+        BIGINT file_size "파일 크기 (바이트)"
+        DATE created_date "생성 날짜"
+        DATE modified_date "수정 날짜"
+        VARCHAR extension "확장자"
+    }
+
+    Category {
+        INT id PK "ID"
+        VARCHAR name "카테고리 이름"
+        BOOLEAN is_default "기본 카테고리 여부"
+    }
+
+    Tag {
+        INT id PK "ID"
+        VARCHAR name "태그 이름"
+        BOOLEAN is_auto_generated "자동 생성 여부"
+    }
+
+    CategoryTag {
+        INT category_id PK,FK
+        INT tag_id PK,FK
+    }
+
+    FileFolderTag {
+        INT file_folder_id PK,FK "FileFolder ID"
+        INT tag_id PK,FK "Tag ID"
+    }
+
+    FileFolder ||--|| FileFolderBasicInfo : ""
+
+    Category ||--o{ CategoryTag : ""
+    Tag ||--o{ CategoryTag : ""
+
+    Tag }o--o{ FileFolderTag : ""
+    
+    FileFolder }o--o{ FileFolderTag : ""
+    
+    
