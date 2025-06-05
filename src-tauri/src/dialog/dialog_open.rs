@@ -1,3 +1,5 @@
+use crate::common::{Response, ResponseStatus};
+
 #[cfg(target_os = "macos")]
 use objc2::MainThreadMarker;
 #[cfg(target_os = "macos")]
@@ -5,7 +7,7 @@ use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy, NSModalRespons
 
 #[tauri::command]
 #[cfg(target_os = "macos")]
-pub fn dialog_open() {
+pub fn dialog_open() -> Response<String> {
   unsafe {
     let mtm = MainThreadMarker::new()
       .expect("Failed to get MainThreadMarker. This should only run on the main thread.");
@@ -34,6 +36,12 @@ pub fn dialog_open() {
     } else {
       println!("선택이 취소되었습니다.");
     }
+  }
+
+  Response {
+    status: ResponseStatus::Success,
+    message: Some(String::from("test good man")),
+    data: None,
   }
 }
 
