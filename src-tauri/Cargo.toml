@@ -25,6 +25,7 @@ tauri = { version = "2.5.0", features = [] }
 tauri-plugin-log = "2.0.0-rc"
 objc2 = "0.6.1"
 objc2-app-kit = "0.3.1"
+chrono = { version = "0.4.41", features = ["serde"] }
 
 [patch.crates-io]
 tauri = { git = "https://github.com/tauri-apps/tauri", rev = "b5c549d1898ecdb712822c02dc665cc6771fbd07" }

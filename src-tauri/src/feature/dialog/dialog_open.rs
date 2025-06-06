@@ -1,4 +1,5 @@
 use crate::common::{Response, ResponseStatus};
+use crate::feature::file::{get_file_info, FileInfo};
 
 #[cfg(target_os = "macos")]
 use objc2::MainThreadMarker;
@@ -7,7 +8,7 @@ use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy, NSModalRespons
 
 #[tauri::command]
 #[cfg(target_os = "macos")]
-pub fn dialog_open() -> Response<String> {
+pub fn dialog_open() -> Response<Vec<FileInfo>> {
   unsafe {
     let mtm = MainThreadMarker::new()
       .expect("Failed to get MainThreadMarker. This should only run on the main thread.");
@@ -24,24 +25,31 @@ pub fn dialog_open() -> Response<String> {
     let response = panel.runModal();
 
     if response == NSModalResponseOK {
-      println!("선택된 경로들:");
       let urls = panel.URLs();
 
-      for url in urls.into_iter() {
-        match url.path() {
-          Some(n) => println!("값: {}", n),
-          None => println!("에러"),
-        }
-      }
-    } else {
-      println!("선택이 취소되었습니다.");
-    }
-  }
+      let file_infos: Vec<FileInfo> = urls
+        .into_iter()
+        .filter_map(|url| url.path())
+        .filter_map(|ns_string| {
+          let rust_string = ns_string.to_string();
+          let path = std::path::Path::new(&rust_string);
 
-  Response {
-    status: ResponseStatus::Success,
-    message: Some(String::from("test good man")),
-    data: None,
+          get_file_info(path)
+        })
+        .collect();
+
+      return Response::<Vec<FileInfo>> {
+        status: ResponseStatus::Success,
+        message: Some(String::from("dialog_open :: success")),
+        data: Some(file_infos),
+      };
+    } else {
+      return Response {
+        status: ResponseStatus::Canceled,
+        message: Some(String::from("dialog_open :: canceled")),
+        data: None,
+      };
+    }
   }
 }
 

@@ -3,7 +3,7 @@ use serde::Serialize;
 #[derive(Debug, Serialize)]
 pub enum ResponseStatus {
   Success,
-  Cancelled,
+  Canceled,
   Failed,
 }
 
