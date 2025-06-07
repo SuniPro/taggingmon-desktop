@@ -3,14 +3,13 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"ssh:moong": "bash ./bin/ssh-add-moong.sh",
 		"build": "react-router build",
 		"dev": "react-router dev",
 		"preview": "serve ./build/client",
 		"typecheck": "react-router typegen && tsc",
 		"tauri": "tauri",
-		"tauri:dev": "pnpm tauri dev",
-		"tauri:build": "pnpm tauri build",
+		"cargo": "cd ./src-tauri && cargo",
+		"cargo:ts-gen": "rm -rf ./src-tauri/bindings && pnpm cargo test export_bindings",
 		"prettier": "npx prettier --write . --ignore-path ./.prettierignore.cli"
 	},
 	"dependencies": {
