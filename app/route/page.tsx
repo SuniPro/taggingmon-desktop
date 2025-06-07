@@ -13,6 +13,8 @@ const Page = memo(() => {
 		try {
 			const result = await invoke('dialog_open');
 			console.log('Rust 함수 실행 성공:', result);
+
+			result.data?.forEach(file => console.log(file.name));
 		} catch (error) {
 			console.error('Rust 함수 실행 실패:', error);
 		}

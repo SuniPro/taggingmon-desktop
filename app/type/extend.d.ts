@@ -1,3 +1,5 @@
+import type { Response } from 'src-tauri/bindings/Response';
+
 declare module '@tauri-apps/api/core' {
 	import tauriAppsApiCore = require('@tauri-apps/api/core');
 
@@ -8,7 +10,18 @@ declare module '@tauri-apps/api/core' {
 	type InvokeArgs = invokeParameters[1];
 	type InvokeOptions = invokeParameters[2];
 
-	type TCommands = 'dialog_open';
+	/******************
+	 * Rust 함수들 확장
+	 ******************/
+	type TCommand = {
+		dialog_open: Array<FileInfo>;
+	};
 
-	declare function invoke<T>(cmd: TCommands, args?: InvokeArgs, options?: InvokeOptions): Promise<T>;
+	type TCommandNames = keyof TCommand;
+
+	declare function invoke(
+		cmd: TCommandNames,
+		args?: InvokeArgs,
+		options?: InvokeOptions,
+	): Promise<Response<TCommand[TCommandNames]>>;
 }

@@ -1,3 +1,4 @@
+use chrono::{DateTime, Local, Utc};
 use std::fs;
 use std::path::Path;
 
@@ -19,8 +20,14 @@ pub fn get_file_info(path: &Path) -> Option<FileInfo> {
     extension,
     is_dir: metadata.is_dir(),
     size,
-    created_at: metadata.created().ok().map(|t| t.into()),
-    modified_at: metadata.modified().ok().map(|t| t.into()),
+    created_at: metadata
+      .created()
+      .ok()
+      .map(|t| DateTime::<Local>::from(t).to_string()),
+    modified_at: metadata
+      .modified()
+      .ok()
+      .map(|t| DateTime::<Local>::from(t).to_string()),
     readonly: metadata.permissions().readonly().into(),
   })
 }
