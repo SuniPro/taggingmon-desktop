@@ -7,6 +7,15 @@ mod feature;
 pub fn run() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
+      feature::folder::read_folder,
+      feature::folder::delete_folder,
+      // ✅ file commands (command.rs)
+      feature::command::add_file,
+      feature::command::delete_file_and_record,
+      feature::command::list_files,
+      // ✅ folder DB commands (command.rs)
+      feature::command::add_folder,
+      feature::command::list_folders,
       feature::dialog::dialog_open,
       hello_world
     ])
