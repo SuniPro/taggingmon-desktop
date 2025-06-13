@@ -1,11 +1,10 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { typedInvoke } from '~/util/typed-invoke';
-import type { Route } from '../+types/root';
-
-export const meta = ({}: Route.MetaArgs) => {
-	return [{ title: 'Root Page' }, { name: 'description', content: 'Welcome to React Router!' }];
-};
+//
+// export const meta = ({}: Route.MetaArgs) => {
+// 	return [{ title: 'Root Page' }, { name: 'description', content: 'Welcome to React Router!' }];
+// };
 
 const Page = memo(() => {
 	const [loading, setLoading] = useState(true);
@@ -46,17 +45,6 @@ const Page = memo(() => {
 
 		checkAndOpenDialog();
 	}, [dialogOpened, navigate]);
-
-
-	const handleManualDialog = useCallback(async () => {
-		const res = await typedInvoke('dialog_open');
-
-		if (res.status === 'Success' && res.data?.[0]?.path) {
-			const selectedPath = res.data[0].path;
-			await typedInvoke('add_folder_record', { path: selectedPath });
-			navigate(`/finder?path=${encodeURIComponent(selectedPath)}`);
-		}
-	}, []);
 
 	if (loading) return <div className="p-10">🔄 로딩 중...</div>;
 
