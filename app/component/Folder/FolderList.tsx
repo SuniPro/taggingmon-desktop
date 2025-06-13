@@ -1,13 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@heroui/react';
 import { useFolder } from '~/context/FoldersContext';
+import { typedInvoke } from '~/util/typed-invoke';
 
 export function FolderList() {
 	const [openDropdownId, setOpenDropdownId] = useState<bigint | null>(null);
 	const navigate = useNavigate();
 
-	const {folders, deleteFolderInRecord} = useFolder();
+	const {folders, addFolderInRecord, deleteFolderInRecord} = useFolder();
+
+	useEffect(() => {
+		if (folders.length === 0){
+			onAddFolder().then()
+		}
+	}, [folders]);
+
+	const onAddFolder = async () => {
+		const res = await typedInvoke('dialog_open');
+		if (res.status === 'Success' && res.data?.[0]?.path) {
+			const selectedPath = res.data[0].path;
+			addFolderInRecord.mutate(selectedPath);
+		} else {
+			console.warn('폴더 선택이 취소되었거나 실패했습니다.');
+		}
+	};
 
 	const handleClick = (path: string) => {
 		navigate(`/finder?path=${encodeURIComponent(path)}`);
