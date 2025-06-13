@@ -44,11 +44,11 @@ export function FolderList() {
 		<div className="p-4">
 			<h2 className="mb-2 text-lg font-bold">📁 등록된 폴더</h2>
 			<ul className="space-y-2">
-				{folders.map((folder, index) => (
+				{folders.map((folder) => (
 					<li key={folder.id}>
 						<Dropdown
 							isOpen={openDropdownId === folder.id}
-							onOpenChange={isOpen => {
+							onOpenChange={(isOpen : boolean) => {
 								if (isOpen) {
 									setOpenDropdownId(folder.id);
 								} else if (openDropdownId === folder.id) {
