@@ -40,7 +40,7 @@ pub fn list_files() -> Result<Vec<crate::feature::file::FileInfo>, String> {
 
 /** folder의 path를 수령받아 이를 db에 저장합니다.*/
 #[tauri::command]
-pub fn add_folder(path: String) -> Response<()> {
+pub fn add_folder_record(path: String) -> Response<()> {
     match init_db() {
         Ok(conn) => match folder_dao::insert_folder(&conn, &path) {
             Ok(_) => Response::ok(()),
@@ -57,6 +57,17 @@ pub fn list_folders() -> Response<Vec<crate::feature::folder::Folder>> {
         Ok(conn) => match folder_dao::list_all_folders(&conn) {
             Ok(data) => Response::ok(data),
             Err(e) => Response::fail(format!("폴더 조회 실패: {}", e)),
+        },
+        Err(e) => Response::fail(format!("DB 연결 실패: {}", e)),
+    }
+}
+
+#[tauri::command]
+pub fn delete_folder_record(path: String) -> Response<()> {
+    match init_db() {
+        Ok(conn) => match folder_dao::delete_folder_record(&conn, &path) {
+            Ok(_) => Response::ok(()),
+            Err(e) => Response::fail(format!("폴더 삭제 실패: {}", e)),
         },
         Err(e) => Response::fail(format!("DB 연결 실패: {}", e)),
     }

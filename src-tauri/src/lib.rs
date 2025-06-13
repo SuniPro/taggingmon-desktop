@@ -14,8 +14,9 @@ pub fn run() {
       feature::command::delete_file_and_record,
       feature::command::list_files,
       // ✅ folder DB commands (command.rs)
-      feature::command::add_folder,
+      feature::command::add_folder_record,
       feature::command::list_folders,
+      feature::command::delete_folder_record,
       feature::dialog::dialog_open,
       hello_world
     ])

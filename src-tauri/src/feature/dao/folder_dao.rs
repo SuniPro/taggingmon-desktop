@@ -23,3 +23,11 @@ pub fn list_all_folders(conn: &Connection) -> Result<Vec<Folder>> {
 
     Ok(rows.filter_map(Result::ok).collect())
 }
+
+pub fn delete_folder_record(conn: &Connection, path: &str) -> Result<()> {
+    conn.execute(
+        "DELETE FROM folders WHERE path = ?1",
+        &[path],
+    )?;
+    Ok(())
+}
