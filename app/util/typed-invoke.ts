@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { FileInfo } from 'src-tauri/bindings/FileInfo';
 import type { Response } from 'src-tauri/bindings/Response';
+import type { Folder } from '../../src-tauri/bindings/Folder';
 
 export const typedInvoke = <T extends keyof TCommand>(
 	cmd: T,
@@ -28,4 +29,11 @@ type InvokeOptions = InvokeParameters[2];
 type TCommand = {
 	dialog_open: [void, Array<FileInfo>];
 	hello_world: [{ str_arg: string }, string];
+	ping_sqlite: [void, string];
+	read_folder: [{ path: string }, FileInfo[]];
+	list_files: [void, Array<FileInfo>];
+	add_folder_record: [{path : string}, void]
+	delete_folder_record: [{path : string}, Response<void>]
+	list_folders: [void, Array<Folder>]
+	delete_folder: [{ path: string }, Response<void>];
 };
