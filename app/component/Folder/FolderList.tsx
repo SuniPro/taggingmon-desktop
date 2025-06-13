@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@heroui/react';
-import { useFolder } from '~/context/FoldersContext';
+import { useFolderContext } from '~/context/FoldersContext';
 import { typedInvoke } from '~/util/typed-invoke';
 
+/** SNB에 추가될 folder List 컴포넌트입니다.
+ * folder list를 컨텍스트를 통해 수령받아
+ *
+ * 사용자가 폴더 내부의 파일을 볼 수 있도록 finder에 쿼리스트링 방식으로 경로를 전달하거나,
+ * db에서 폴더를 삭제하는 기능을 수행합니다.
+ * */
 export function FolderList() {
 	const [openDropdownId, setOpenDropdownId] = useState<bigint | null>(null);
 	const navigate = useNavigate();
 
-	const {folders, addFolderInRecord, deleteFolderInRecord} = useFolder();
+	const {record, addFolderInRecord, deleteFolderInRecord} = useFolderContext();
+	const {folders} = record;
 
 	useEffect(() => {
 		if (folders.length === 0){
