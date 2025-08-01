@@ -1,10 +1,10 @@
 import { FolderList } from '~/component/Folder/FolderList';
 import { Button } from '@heroui/button';
-import { useFolder } from '~/context/FoldersContext';
+import { useFolderContext } from '~/context/FoldersContext';
 import { typedInvoke } from '~/util/typed-invoke';
 
 export const Test = () => {
-	const { addFolderInRecord } = useFolder();
+	const { addFolderInRecord } = useFolderContext();
 	const onAddFolder = async () => {
 		const res = await typedInvoke('dialog_open');
 		if (res.status === 'Success' && res.data?.[0]?.path) {
