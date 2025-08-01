@@ -10,3 +10,4 @@ mod category;
 mod tools;
 mod fso_tag;
 mod fso_category;
+mod folder;
