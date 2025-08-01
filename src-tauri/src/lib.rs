@@ -1,22 +1,14 @@
 use crate::common::Response;
+use crate::feature::db::init_db;
 
 mod common;
 mod feature;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    init_db().expect("좆됨 db 실행안됨");  // ✅ 앱 시작 시 1회 테이블 초기화
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
-      feature::folder::read_folder,
-      feature::folder::delete_folder,
-      // ✅ file commands (command.rs)
-      feature::command::add_file,
-      feature::command::delete_file_and_record,
-      feature::command::list_files,
-      // ✅ folder DB commands (command.rs)
-      feature::command::add_folder_record,
-      feature::command::list_folders,
-      feature::command::delete_folder_record,
       feature::dialog::dialog_open,
       hello_world
     ])
