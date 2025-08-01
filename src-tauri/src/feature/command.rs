@@ -2,73 +2,92 @@ use tauri::command;
 use std::path::PathBuf;
 use crate::{
     feature::file::{get_file_info, delete_file},
-    feature::dao::file_dao,
 };
 use crate::common::{Response};
-use crate::feature::db::init_db;
-use crate::feature::dao::folder_dao;
+use crate::feature::db::{init_connection};
+use crate::feature::fso::FsoInfo;
 
-
-#[command]
-pub fn add_file(path: String) -> Result<(), String> {
-    let conn = init_db().map_err(|e| e.to_string())?;
-    let info = get_file_info(&PathBuf::from(&path)).ok_or("파일 정보를 가져올 수 없습니다.")?;
-
-    file_dao::insert_file(&conn, &info).map_err(|e| e.to_string())?;
-    Ok(())
-}
+use tokio::task;
+use crate::feature::dao::fso_dao;
 
 #[command]
-pub fn delete_file_and_record(path: String) -> Result<(), String> {
-    let conn = crate::feature::db::init_db().map_err(|e| e.to_string())?;
-
-    // DB에서 삭제
-    file_dao::delete_file_record(&conn, &path).map_err(|e| e.to_string())?;
-
-    // 실제 파일 삭제
-    let file_path = PathBuf::from(&path);
-    delete_file(&file_path).map_err(|e| e.to_string())?;
-
-    Ok(())
-}
-
-#[command]
-pub fn list_files() -> Result<Vec<crate::feature::file::FileInfo>, String> {
-    let conn = init_db().map_err(|e| e.to_string())?;
-    file_dao::list_all_files(&conn).map_err(|e| e.to_string())
-}
-
-/** folder의 path를 수령받아 이를 db에 저장합니다.*/
-#[tauri::command]
-pub fn add_folder_record(path: String) -> Response<()> {
-    match init_db() {
-        Ok(conn) => match folder_dao::insert_folder(&conn, &path) {
-            Ok(_) => Response::ok(()),
-            Err(e) => Response::fail(format!("폴더 등록 실패: {}", e)),
-        },
-        Err(e) => Response::fail(format!("DB 연결 실패: {}", e)),
+pub async fn delete_fso_async(fso_id: i64) -> Response<()> {
+    match task::spawn_blocking(move || {
+        let conn = init_connection()?;
+        fso_dao::delete_fso(&conn, fso_id)
+    }).await {
+        Ok(Ok(_)) => Response::ok(()),
+        Ok(Err(e)) => Response::fail(format!("삭제 실패: {}", e)),
+        Err(e) => Response::fail(format!("스레드 실패: {}", e)),
     }
 }
 
-/** SNB에 사용하는 폴더 리스트업 기능입니다.*/
-#[tauri::command]
-pub fn list_folders() -> Response<Vec<crate::feature::folder::Folder>> {
-    match init_db() {
-        Ok(conn) => match folder_dao::list_all_folders(&conn) {
-            Ok(data) => Response::ok(data),
-            Err(e) => Response::fail(format!("폴더 조회 실패: {}", e)),
-        },
-        Err(e) => Response::fail(format!("DB 연결 실패: {}", e)),
+#[command]
+pub async fn update_fso(
+    fso_id: i64,
+    update_info: FsoInfo,
+    category_ids: Vec<i64>,
+    tag_ids: Vec<i64>,
+) -> Response<()> {
+    match task::spawn_blocking(move || {let conn = init_connection()?;
+        fso_dao::update_fso(&conn, fso_id, &update_info, &category_ids, &tag_ids)
+    }).await {
+        Ok(Ok(_)) => Response::ok(()),
+        Ok(Err(e)) => Response::fail(format!("업데이트 실패: {}", e)),
+        Err(e) => Response::fail(format!("스레드 실패: {}", e)),
     }
 }
 
-#[tauri::command]
-pub fn delete_folder_record(path: String) -> Response<()> {
-    match init_db() {
-        Ok(conn) => match folder_dao::delete_folder_record(&conn, &path) {
-            Ok(_) => Response::ok(()),
-            Err(e) => Response::fail(format!("폴더 삭제 실패: {}", e)),
-        },
-        Err(e) => Response::fail(format!("DB 연결 실패: {}", e)),
+#[command]
+pub async fn get_fsos_by_tag_ids_async(tag_ids: Vec<i64>) -> Response<Vec<FsoInfo>> {
+    match task::spawn_blocking(move || {
+        let conn = init_connection()?; // 비동기 아님, spawn_blocking 안이라 안전
+        fso_dao::get_fsos_by_tag_ids(&conn, &tag_ids)
+    })
+        .await
+    {
+        Ok(Ok(fsos)) => Response::ok(fsos),
+        Ok(Err(e)) => Response::fail(format!("FSO 조회 실패: {}", e)),
+        Err(e) => Response::fail(format!("스레드 실패: {}", e)),
     }
 }
+
+#[command]
+pub async fn get_fsos_by_category_ids_async(category_ids: Vec<i64>) -> Response<Vec<FsoInfo>> {
+    match task::spawn_blocking(move || {
+        let conn = init_connection()?;
+        fso_dao::get_fsos_by_category_ids(&conn, &category_ids)
+    }).await {
+        Ok(Ok(fsos)) => Response::ok(fsos),
+        Ok(Err(e)) => Response::fail(format!("FSO 조회 실패: {}", e)),
+        Err(e) => Response::fail(format!("스레드 실패: {}", e)),
+    }
+}
+
+/// 비동기 방식으로 category와 tag 기반 FSO 목록을 조회합니다.
+/// 중복 제거는 get_fsos_by_categories_and_tags 내부에서 수행됩니다.
+#[command]
+pub async fn get_fsos_by_categories_and_tags_async(
+    category_ids: Vec<i64>,
+    tag_ids: Vec<i64>
+) -> Response<Vec<FsoInfo>> {
+    let result = task::spawn_blocking(move || {
+        let conn = init_connection()?;
+        fso_dao::get_fsos_by_categories_and_tags(&conn, &category_ids, &tag_ids)
+    }).await;
+
+    match result {
+        Ok(Ok(fsos)) => Response::ok(fsos),
+        Ok(Err(e)) => {
+            log::error!("FSO 병합 조회 실패: {}", e);
+            Response::fail(format!("FSO 병합 조회 실패: {}", e))
+        },
+        Err(e) => {
+            log::error!("스레드 실패: {:?}", e);
+            Response::fail(format!("스레드 실패: {}", e))
+        },
+    }
+}
+
+
+
