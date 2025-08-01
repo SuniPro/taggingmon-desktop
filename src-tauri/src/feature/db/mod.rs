@@ -8,6 +8,13 @@ pub fn init_db() -> Result<Connection> {
     let db_path = get_db_path();
     let conn = Connection::open(db_path)?;
     create_tables(&conn)?;
+    
+    Ok(conn)
+}
+
+pub fn init_connection() -> Result<Connection> {
+    let conn = Connection::open("app.db")?;
+    conn.execute("PRAGMA foreign_keys = ON", [])?;
     Ok(conn)
 }
 
