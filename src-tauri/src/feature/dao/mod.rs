@@ -1,2 +1,4 @@
-pub mod file_dao;
-pub mod folder_dao;
+mod tag_dao;
+mod category_dao;
+
+pub mod fso_dao;
