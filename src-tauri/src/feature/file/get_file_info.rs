@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, Utc};
+use chrono::{DateTime, Local};
 use std::fs;
 use std::path::Path;
 
@@ -15,19 +15,22 @@ pub fn get_file_info(path: &Path) -> Option<FileInfo> {
   };
 
   Some(FileInfo {
+    id: None,  // 새로 생성되므로 없음
     path: path.to_path_buf(),
     name: file_name,
     extension,
     is_dir: metadata.is_dir(),
     size,
     created_at: metadata
-      .created()
-      .ok()
-      .map(|t| DateTime::<Local>::from(t).to_string()),
+        .created()
+        .ok()
+        .map(|t| DateTime::<Local>::from(t).to_string()),
     modified_at: metadata
-      .modified()
-      .ok()
-      .map(|t| DateTime::<Local>::from(t).to_string()),
-    readonly: metadata.permissions().readonly().into(),
+        .modified()
+        .ok()
+        .map(|t| DateTime::<Local>::from(t).to_string()),
+    readonly: metadata.permissions().readonly(),
+    category: None,
+    tags: None,
   })
 }

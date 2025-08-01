@@ -1,10 +1,12 @@
 use crate::common::Response;
+use crate::feature::db::init_db;
 
 mod common;
 mod feature;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    init_db().expect("좆됨 db 실행안됨");  // ✅ 앱 시작 시 1회 테이블 초기화
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       feature::dialog::dialog_open,

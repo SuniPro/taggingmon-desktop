@@ -1,2 +1,13 @@
 pub mod dialog;
 pub mod file;
+pub mod dao;
+pub mod db;
+pub mod dev;
+pub mod command;
+mod fso;
+mod tag;
+mod category;
+mod tools;
+mod fso_tag;
+mod fso_category;
+mod folder;
