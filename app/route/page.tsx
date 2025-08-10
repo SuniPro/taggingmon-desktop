@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { FsoInfo } from '~/component/Info/fso-info';
 //
 // export const meta = ({}: Route.MetaArgs) => {
 // 	return [{ title: 'Root Page' }, { name: 'description', content: 'Welcome to React Router!' }];
@@ -114,6 +115,8 @@ const Page = memo(() => {
 							</ul>
 						</div>
 					</div>
+
+					<FsoInfo></FsoInfo>
 				</div>
 			</div>
 		</main>
