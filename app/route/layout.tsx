@@ -1,7 +1,5 @@
-import { Button } from '@heroui/react';
 import { memo, useEffect } from 'react';
 import { Outlet } from 'react-router';
-import { Test } from '~/component/test';
 
 const Layout = memo(() => {
 	document.documentElement.classList.toggle(
@@ -29,14 +27,13 @@ const Layout = memo(() => {
 	}, []);
 
 	return (
-		<div>
-			<div className="titlebar absolute inset-0 h-8 w-full bg-white/10 select-none" data-tauri-drag-region />
+		<div className="h-full w-full overflow-hidden">
+			<div
+				className="titlebar absolute inset-0 h-8 w-full bg-transparent select-none"
+				data-tauri-drag-region
+			/>
 
-			<Button className="mx-auto block w-fit">BB</Button>
-
-			<div>layout</div>
 			<Outlet />
-			<Test />
 		</div>
 	);
 });

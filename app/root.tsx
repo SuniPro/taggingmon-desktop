@@ -43,9 +43,9 @@ export default function App() {
 
 	return (
 		<QueryClientProvider client={QUERY_CLIENT}>
-			<FolderProvider>
-				<Outlet />
-			</FolderProvider>
+			{/* <FolderProvider> */}
+			<Outlet />
+			{/* </FolderProvider> */}
 		</QueryClientProvider>
 	);
 }
