@@ -1,14 +1,16 @@
+import type { As } from '@heroui/react';
+import type { FC, ReactNode } from 'react';
 import type { WIDGET_SIZE } from '~/hook/useAppleRadius';
-import type { ReactNode } from 'react';
 
-interface widgetProps {
+interface WidgetCardProps {
 	size: WIDGET_SIZE;
-	k?: number;
 	children: ReactNode;
+	as?: As<any>;
+	k?: number;
 }
 
-export function WidgetCard(props: widgetProps) {
-	const { size, k = 0.223, children } = props;
+export const WidgetCard: FC<WidgetCardProps> = ({ size, k = 0.223, children, as }) => {
+	const Component = as || 'div';
 
 	const radiusMap: Record<WIDGET_SIZE, number> = {
 		small: 12,
@@ -17,11 +19,11 @@ export function WidgetCard(props: widgetProps) {
 	};
 
 	return (
-		<div
+		<Component
 			style={{ borderRadius: radiusMap[size] }}
 			className="flex items-center justify-center gap-2 border border-black/5 bg-white/90 p-4 shadow-lg backdrop-blur"
 		>
 			{children}
-		</div>
+		</Component>
 	);
-}
+};

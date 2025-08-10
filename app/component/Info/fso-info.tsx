@@ -1,4 +1,4 @@
-import { WidgetCard } from '~/component/layouts/layouts';
+import { WidgetCard } from '../ui/widget-card';
 
 const WIDGET_LIST = ['info', 'tag', 'category'];
 
