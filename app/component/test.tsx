@@ -1,5 +1,5 @@
+import { Button } from '@heroui/react';
 import { FolderList } from '~/component/Folder/FolderList';
-import { Button } from '@heroui/button';
 import { useFolderContext } from '~/context/FoldersContext';
 import { typedInvoke } from '~/util/typed-invoke';
 
@@ -15,9 +15,11 @@ export const Test = () => {
 		}
 	};
 
-	return   <div className="flex flex-col justify-start items-start gap-4">
-		<div>TEST FUNCTION</div>
-		<Button onPress={onAddFolder}>폴더추가</Button>
-		<FolderList />
-	</div>
+	return (
+		<div className="flex flex-col items-start justify-start gap-4">
+			<div>TEST FUNCTION</div>
+			<Button onPress={onAddFolder}>폴더추가</Button>
+			<FolderList />
+		</div>
+	);
 };

@@ -1,5 +1,4 @@
-import { Button } from '@heroui/button';
-import { Spinner } from '@heroui/spinner';
+import { Button, Spinner } from '@heroui/react';
 import { Link } from 'react-router';
 import type { Route } from '../+types/layout';
 
