@@ -2,7 +2,7 @@ import { useLocation } from 'react-router';
 import { useCallback, useEffect, useState } from 'react';
 import type { FileInfo } from '../../../src-tauri/bindings/FileInfo';
 import { typedInvoke } from '~/util/typed-invoke';
-import { File } from '~/component/File';
+import { File } from '~/component/file';
 
 export default function Finder() {
 	const location = useLocation();
