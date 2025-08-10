@@ -1,5 +1,5 @@
 import { Button } from '@heroui/react';
-import { FolderList } from '~/component/Folder/FolderList';
+import { FolderList } from '~/component/folder/FolderList';
 import { useFolderContext } from '~/context/FoldersContext';
 import { typedInvoke } from '~/util/typed-invoke';
 
