@@ -10,7 +10,9 @@ pub fn run() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       feature::dialog::dialog_open,
-      hello_world
+      feature::command::insert_categories,
+      feature::command::get_categories,
+      feature::command::insert_fso_async
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {
