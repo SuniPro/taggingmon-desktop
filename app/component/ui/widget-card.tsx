@@ -1,6 +1,6 @@
 import type { As } from '@heroui/react';
 import type { FC, ReactNode } from 'react';
-import type { WIDGET_SIZE } from '~/hook/useAppleRadius';
+import type { WIDGET_SIZE } from '~/hook/use-apple-radius';
 
 interface WidgetCardProps {
 	size: WIDGET_SIZE;

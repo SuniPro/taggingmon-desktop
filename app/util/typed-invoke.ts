@@ -2,6 +2,9 @@ import { invoke } from '@tauri-apps/api/core';
 import type { FileInfo } from 'src-tauri/bindings/FileInfo';
 import type { Response } from 'src-tauri/bindings/Response';
 import type { Folder } from '../../src-tauri/bindings/Folder';
+import type { Category } from '../../src-tauri/bindings/Category';
+import type { FsoInfo } from '../../src-tauri/bindings/FsoInfo';
+import type { FsoWithLinks } from '../../src-tauri/bindings/FsoWithLinks';
 
 export const typedInvoke = <T extends keyof TCommand>(
 	cmd: T,
@@ -32,8 +35,13 @@ type TCommand = {
 	ping_sqlite: [void, string];
 	read_folder: [{ path: string }, FileInfo[]];
 	list_files: [void, Array<FileInfo>];
-	add_folder_record: [{path : string}, void]
-	delete_folder_record: [{path : string}, Response<void>]
-	list_folders: [void, Array<Folder>]
+	add_folder_record: [{ path: string }, void];
+	delete_folder_record: [{ path: string }, Response<void>];
+	list_folders: [void, Array<Folder>];
 	delete_folder: [{ path: string }, Response<void>];
+	insert_categories: [{ categories: Array<{ name: string; is_default: boolean }> }, Array<Category>];
+	get_categories: [void, Array<Category>];
+	insert_fso_async: [{ fso_info_list: FsoInfo[]; category_ids?: number; tag_ids?: number }, number[]];
+	process_and_insert_all: [{ fso_list: FsoInfo[] }, BigInt[]];
+	get_all_fsos_with_links_async: [void, FsoWithLinks[]];
 };

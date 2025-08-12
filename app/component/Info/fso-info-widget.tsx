@@ -2,7 +2,7 @@ import { WidgetCard } from '../ui/widget-card';
 
 const WIDGET_LIST = ['info', 'tag', 'category'];
 
-export function FsoInfo() {
+export function FsoInfoWidget() {
 	return (
 		<div className="flex flex-col justify-center gap-[10px] align-top">
 			{WIDGET_LIST.map(widget => (

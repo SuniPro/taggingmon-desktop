@@ -11,6 +11,6 @@ use crate::feature::tag::Tag;
 pub struct Category {
     pub id: i64,
     pub name: String,
-    pub is_default: String,
+    pub is_default: bool,
     pub tags: Option<Vec<Tag>>,
 }

@@ -7,4 +7,4 @@
     각 fso는 태그를 갖고 있으며, 생성, 수정일자, 
     확장자를 기반으로 한 태그들은 is auto generated가 true 입니다.
 */
-export type Tag = { id: bigint, category_id: bigint, name: string, is_auto_generated: string, };
+export type Tag = { id: bigint, category_id: bigint, name: string, is_auto_generated: boolean, };

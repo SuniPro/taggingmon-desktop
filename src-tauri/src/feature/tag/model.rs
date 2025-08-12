@@ -14,5 +14,5 @@ pub struct Tag {
     pub id: i64,
     pub category_id: i64,
     pub name: String,
-    pub is_auto_generated: String,
+    pub is_auto_generated: bool,
 }

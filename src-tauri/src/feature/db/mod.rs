@@ -13,8 +13,9 @@ pub fn init_db() -> Result<Connection> {
 }
 
 pub fn init_connection() -> Result<Connection> {
-    let conn = Connection::open("app.db")?;
-    conn.execute("PRAGMA foreign_keys = ON", [])?;
+    let db_path = get_db_path(); // 올바른 경로를 가져옵니다.
+    let conn = Connection::open(db_path)?;
+    conn.execute("PRAGMA foreign_keys = ON", [])?; // 외래 키 설정도 추가합니다.
     Ok(conn)
 }
 

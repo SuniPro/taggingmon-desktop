@@ -1,13 +1,18 @@
+use crate::feature::dto::FsoWithLinks;
 use crate::feature::fso::FsoInfo;
-use crate::feature::tools::{map_row_to_fso, remove_duplicates, to_sql_params};
+use crate::feature::tools::{
+  map_row_to_category, map_row_to_fso, map_row_to_tag, remove_duplicates, to_sql_params,
+};
+use log::info;
 use rusqlite::{params_from_iter, Connection, Result};
+use std::collections::HashMap;
 
 /// FSO 정보를 데이터베이스에 삽입하고, 관련된 카테고리 및 태그 관계도 함께 설정합니다.
 pub fn insert_fso(
   conn: &Connection,
   fso: &FsoInfo,
-  category_ids: &[i64],
-  tag_ids: &[i64],
+  category_id: Option<&i64>, // Option<&[i64]>로 수정
+  tag_id: Option<&i64>,      // Option<&[i64]>로 수정
 ) -> Result<i64> {
   conn.execute(
     "INSERT INTO fso (
@@ -28,19 +33,19 @@ pub fn insert_fso(
 
   let fso_id = conn.last_insert_rowid();
 
-  // Category 연결
-  for category_id in category_ids {
+  // category_id가 Some일 때만 실행
+  if let Some(c_id) = category_id {
     conn.execute(
       "INSERT OR IGNORE INTO fso_category (fso_id, category_id) VALUES (?1, ?2)",
-      rusqlite::params![fso_id, category_id],
+      rusqlite::params![fso_id, c_id],
     )?;
   }
 
-  // Tag 연결
-  for tag_id in tag_ids {
+  // tag_id가 Some일 때만 실행
+  if let Some(t_id) = tag_id {
     conn.execute(
       "INSERT OR IGNORE INTO fso_tag (fso_id, tag_id) VALUES (?1, ?2)",
-      rusqlite::params![fso_id, tag_id],
+      rusqlite::params![fso_id, t_id],
     )?;
   }
 
@@ -131,15 +136,15 @@ pub fn get_fsos_by_categories_and_tags(
     params.extend(tag_ids.iter().map(|&id| id.into()));
   }
 
-    // UNION ALL을 사용하여 중복 포함 쿼리 실행
-    let query = query_parts.join(" UNION ALL");
+  // UNION ALL을 사용하여 중복 포함 쿼리 실행
+  let query = query_parts.join(" UNION ALL");
 
-    let mut stmt = conn.prepare(&query)?;
-    let rows = stmt.query_map(params_from_iter(params), map_row_to_fso)?;
+  let mut stmt = conn.prepare(&query)?;
+  let rows = stmt.query_map(params_from_iter(params), map_row_to_fso)?;
 
-    // 중복 제거 후 반환
-    let fsos = rows.collect::<Result<Vec<_>>>()?;
-    Ok(remove_duplicates(fsos))
+  // 중복 제거 후 반환
+  let fsos = rows.collect::<Result<Vec<_>>>()?;
+  Ok(remove_duplicates(fsos))
 }
 
 fn repeat_vars(n: usize) -> String {
@@ -147,6 +152,67 @@ fn repeat_vars(n: usize) -> String {
     .take(n)
     .collect::<Vec<_>>()
     .join(", ")
+}
+
+pub fn get_all_fsos_with_links(conn: &Connection) -> Result<Vec<FsoWithLinks>> {
+  // 1. 모든 FSO를 가져오고 중복처리 등을 위해 HashMap에 저장합니다.
+  let mut fso_map: HashMap<i64, FsoWithLinks> = conn
+    .prepare("SELECT * FROM fso")?
+    .query_map([], |row| {
+      let fso_info: FsoInfo = map_row_to_fso(row)?;
+      let id = fso_info.id.expect("FSO ID must exist for this query");
+      Ok((
+        id,
+        FsoWithLinks {
+          id,
+          name: fso_info.name,
+          path: fso_info.path,
+          is_folder: fso_info.is_folder,
+          size: fso_info.size,
+          created_at: fso_info.created_at,
+          modified_at: fso_info.modified_at,
+          extension: fso_info.extension,
+          readonly: fso_info.readonly,
+          categories: None,
+          tags: None,
+        },
+      ))
+    })?
+    .collect::<Result<HashMap<_, _>>>()?;
+
+  if fso_map.is_empty() {
+    return Ok(Vec::new());
+  }
+
+  // 2. 카테고리를 묶는 조인 연산입니다.
+  let mut category_stmt = conn.prepare(
+    "SELECT fc.fso_id, c.* FROM fso_category fc JOIN category c ON fc.category_id = c.id",
+  )?;
+  
+  let categories_rows =
+    category_stmt.query_map([], |row| Ok((row.get(0)?, map_row_to_category(row)?)))?;
+  for row in categories_rows {
+    if let Ok((fso_id, category)) = row {
+      if let Some(fso) = fso_map.get_mut(&fso_id) {
+        fso.categories.get_or_insert_with(Vec::new).push(category);
+      }
+    }
+  }
+
+  // 3. 태그를 묶는 조인 연산입니다.
+  let mut tag_stmt =
+    conn.prepare("SELECT ft.fso_id, t.* FROM fso_tag ft JOIN tag t ON ft.tag_id = t.id")?;
+  
+  let tags_rows = tag_stmt.query_map([], |row| Ok((row.get(0)?, map_row_to_tag(row)?)))?;
+  for row in tags_rows {
+    if let Ok((fso_id, tag)) = row {
+      if let Some(fso) = fso_map.get_mut(&fso_id) {
+        fso.tags.get_or_insert_with(Vec::new).push(tag);
+      }
+    }
+  }
+
+  Ok(fso_map.into_values().collect())
 }
 
 pub fn delete_fso(conn: &Connection, fso_id: i64) -> Result<()> {

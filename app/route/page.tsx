@@ -1,13 +1,18 @@
-import { memo, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { FsoInfo } from '~/component/Info/fso-info';
+import { memo, useEffect } from 'react';
+import { FsoInfoWidget } from '~/component/Info/fso-info-widget';
 import { Input } from '~/component/ui/input';
 import { ScrollArea } from '~/component/ui/scroll-area';
 import { X } from 'lucide-react';
+import { PlusIcon } from '~/assets/icons/icons';
+import { useDialog } from '~/hook/use-dialog';
+import { getAllCategories } from '~/hook/use-category-handle';
+import { invokeData } from '~/response/response';
+import type { FsoWithLinks } from '../../src-tauri/bindings/FsoWithLinks';
 //
 // export const meta = ({}: Route.MetaArgs) => {
 // 	return [{ title: 'Root Page' }, { name: 'description', content: 'Welcome to React Router!' }];
 // };
+
 const items = [
 	{
 		key: 'new',
@@ -26,44 +31,43 @@ const items = [
 		label: 'Delete file',
 	},
 ];
+
 const Page = memo(() => {
-	const [dialogOpened, setDialogOpened] = useState(false); // 호출 여부 flag
-	const navigate = useNavigate();
+	const { checkAndOpenDialog, fsoList } = useDialog();
 
-	// useEffect(() => {
-	// 	if (dialogOpened) return; // 이미 열렸으면 무시
+	useEffect(() => {
+		if (fsoList && fsoList.length > 0) {
+			console.log('fsoList', fsoList);
 
-	// 	const checkAndOpenDialog = async () => {
-	// 		setLoading(true);
-	// 		const folderRes = await typedInvoke('list_folders');
+			// fsoList를 복사해서 id를 null로 변경하는 로직
+			const fsoListWithNullId = fsoList.map(fso => ({
+				...fso,
+				id: null,
+			}));
 
-	// 		if (folderRes.status === 'Success' && (folderRes.data?.length ?? 0) === 0) {
-	// 			setDialogOpened(true); // 다이얼로그 실행 플래그 설정
-	// 			const dialogRes = await typedInvoke('dialog_open');
+			// Tauri 커맨드 호출
+			// fsoListWithNullId를 camelCase인 fsoList로 전달합니다.
+			invokeData<number[]>('process_and_insert_all', { fsoList: fsoListWithNullId })
+				.then(ids => {
+					// `then` 블록에는 성공 시의 결과인 `ids`만 전달됩니다.
+					console.log('성공:', ids);
+				})
+				.catch(error => {
+					// `catch` 블록에는 Rust의 모든 실패 응답(Failed/Canceled)과 Tauri 에러가 `TransferError`로 통일되어 잡힙니다.
+					console.error('에러:', error);
+				});
+		}
+	}, [fsoList]);
 
-	// 			if (dialogRes.status === 'Success') {
-	// 				const folderPath = dialogRes.data?.[0]?.path;
-	// 				if (folderPath) {
-	// 					await typedInvoke('add_folder_record', { path: folderPath });
-	// 					navigate(`/finder?path=${encodeURIComponent(folderPath)}`);
-	// 				} else {
-	// 					console.warn('❌ 선택된 폴더가 없습니다');
-	// 				}
-	// 			} else {
-	// 				console.error('❌ 다이얼로그 실패:', dialogRes.message);
-	// 			}
-	// 		} else {
-	// 			const existingPath = folderRes.data?.[0]?.path;
-	// 			if (existingPath) {
-	// 				navigate(`/finder?path=${encodeURIComponent(existingPath)}`);
-	// 			}
-	// 		}
+	const viewCategory = () => {
+		getAllCategories().then(r => console.log(r));
+	};
 
-	// 		setLoading(false);
-	// 	};
-
-	// 	checkAndOpenDialog();
-	// }, [dialogOpened, navigate]);
+	const viewFsos = () => {
+		invokeData<FsoWithLinks[]>('get_all_fsos_with_links_async')
+			.then(r => console.log(r))
+			.catch(error => console.error(error));
+	};
 
 	return (
 		<main className="flex h-full w-full">
@@ -142,6 +146,16 @@ const Page = memo(() => {
 				</div>
 				{/* /태그 필터 */}
 
+				<button onClick={() => checkAndOpenDialog()} className="h-5 w-5 bg-amber-500"></button>
+				<PlusIcon width={40} height={40} />
+
+				<button onClick={viewCategory} className="rounded-md bg-blue-500">
+					저장된 카테고리 확인
+				</button>
+				<button onClick={viewFsos} className="rounded-md bg-amber-500">
+					저장된 모든 FSO 확인
+				</button>
+
 				{/* 파일 목록 */}
 				<div className="flex h-full gap-2">
 					{/* 좌측 */}
@@ -163,7 +177,7 @@ const Page = memo(() => {
 							</ScrollArea>
 						</div>
 					</div>
-					<FsoInfo></FsoInfo>
+					<FsoInfoWidget />
 
 					{/* /좌측 */}
 
