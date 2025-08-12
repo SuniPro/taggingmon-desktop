@@ -5,13 +5,8 @@ import { ScrollArea } from '~/component/ui/scroll-area';
 import { X } from 'lucide-react';
 import { PlusIcon } from '~/assets/icons/icons';
 import { useDialog } from '~/hook/use-dialog';
-import {
-	AutoCategoriesAndInfoGenerator,
-	createAutoCategories,
-	getAllCategories,
-} from '~/hook/use-category-handle';
-import { insertFsoInDB } from '~/hook/use-fso-handle';
-import type { FsoInfo } from '../../src-tauri/bindings/FsoInfo';
+import { getAllCategories } from '~/hook/use-category-handle';
+import { invokeData } from '~/response/response';
 //
 // export const meta = ({}: Route.MetaArgs) => {
 // 	return [{ title: 'Root Page' }, { name: 'description', content: 'Welcome to React Router!' }];
@@ -39,14 +34,27 @@ const Page = memo(() => {
 	const { checkAndOpenDialog, fsoList } = useDialog();
 
 	useEffect(() => {
-		const result = AutoCategoriesAndInfoGenerator(fsoList);
-		const categoriesInputArray = result.map(item => {
-			return { name: item.name, is_default: item.is_default };
-		});
-		const targetFso: FsoInfo[] = result.map(info => info.fsoInfo);
-		createAutoCategories(categoriesInputArray).then(r => {
-			r.forEach(category => insertFsoInDB({ fso_info_list: targetFso, category_id: category.id }));
-		});
+		if (fsoList && fsoList.length > 0) {
+			console.log('fsoList', fsoList);
+
+			// fsoList를 복사해서 id를 null로 변경하는 로직
+			const fsoListWithNullId = fsoList.map(fso => ({
+				...fso,
+				id: null,
+			}));
+
+			// Tauri 커맨드 호출
+			// fsoListWithNullId를 camelCase인 fsoList로 전달합니다.
+			invokeData<number[]>('process_and_insert_all', { fsoList: fsoListWithNullId })
+				.then(ids => {
+					// `then` 블록에는 성공 시의 결과인 `ids`만 전달됩니다.
+					console.log('성공:', ids);
+				})
+				.catch(error => {
+					// `catch` 블록에는 Rust의 모든 실패 응답(Failed/Canceled)과 Tauri 에러가 `TransferError`로 통일되어 잡힙니다.
+					console.error('에러:', error);
+				});
+		}
 	}, [fsoList]);
 
 	const viewCategory = () => {

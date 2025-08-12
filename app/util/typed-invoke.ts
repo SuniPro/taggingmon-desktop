@@ -41,4 +41,5 @@ type TCommand = {
 	insert_categories: [{ categories: Array<{ name: string; is_default: boolean }> }, Array<Category>];
 	get_categories: [void, Array<Category>];
 	insert_fso_async: [{ fso_info_list: FsoInfo[]; category_ids?: number; tag_ids?: number }, number[]];
+	process_and_insert_all: [{ fso_list: FsoInfo[] }, BigInt[]];
 };

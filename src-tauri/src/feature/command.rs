@@ -1,12 +1,58 @@
-use serde::Deserialize;
 use crate::common::Response;
 use crate::feature::db::init_connection;
 use crate::feature::fso::FsoInfo;
+use serde::Deserialize;
+use std::collections::HashMap;
 use tauri::command;
 
 use crate::feature::category::Category;
 use crate::feature::dao::{category_dao, fso_dao};
 use tokio::task;
+
+#[command]
+pub async fn process_and_insert_all(fso_list: Vec<FsoInfo>) -> Response<Vec<i64>> {
+  let result = task::spawn_blocking(move || -> Result<Vec<i64>, rusqlite::Error> {
+    let mut conn = init_connection()?;
+    let tx = conn.transaction()?;
+
+    let mut inserted_fso_ids = Vec::new();
+    let mut category_map: HashMap<String, i64> = HashMap::new();
+
+    for fso in fso_list {
+      let mut category_id_option = None;
+
+      if let Some(created_at) = fso.created_at.as_ref() {
+        if let Some(category_name) = created_at.get(0..7) {
+          if let Some(id) = category_map.get(category_name) {
+            category_id_option = Some(*id);
+          } else {
+            let category = category_dao::insert_category(&tx, category_name, true)?;
+            category_map.insert(category_name.to_string(), category.id);
+            category_id_option = Some(category.id);
+          }
+        }
+      }
+
+      let fso_id = fso_dao::insert_fso(&tx, &fso, category_id_option.as_ref(), None)?;
+      inserted_fso_ids.push(fso_id);
+    }
+
+    tx.commit()?;
+    Ok(inserted_fso_ids)
+  })
+  .await;
+  match result {
+    Ok(Ok(ids)) => Response::ok(ids),
+    Ok(Err(e)) => {
+      log::error!("데이터베이스 작업 실패: {}", e);
+      Response::fail(e.to_string())
+    }
+    Err(e) => {
+      log::error!("스레드 실패: {}", e);
+      Response::fail(e.to_string())
+    }
+  }
+}
 
 #[derive(Debug, Deserialize)]
 pub struct CategoryInput {
@@ -19,7 +65,7 @@ pub async fn insert_categories(categories: Vec<CategoryInput>) -> Response<Vec<C
   match task::spawn_blocking(move || -> Result<Vec<Category>, rusqlite::Error> {
     let mut conn = init_connection()?;
     let tx = conn.transaction()?; // 트랜잭션 시작
-    
+
     let mut inserted = Vec::with_capacity(categories.len());
 
     for category in categories {
@@ -33,20 +79,20 @@ pub async fn insert_categories(categories: Vec<CategoryInput>) -> Response<Vec<C
     log::info!("inserted categories successfully");
     Ok(inserted)
   })
-      .await
+  .await
   {
     Ok(Ok(inserted)) => {
       log::info!("모든 카테고리 삽입 성공");
       Response::ok(inserted)
-    },
+    }
     Ok(Err(e)) => {
       log::error!("데이터베이스 작업 실패: {}", e);
       Response::fail(format!("생성 실패: {}", e))
-    },
+    }
     Err(e) => {
       log::error!("스레드 실패: {}", e);
       Response::fail(format!("스레드 실패: {}", e))
-    },
+    }
   }
 }
 
@@ -56,7 +102,7 @@ pub async fn get_categories() -> Response<Vec<Category>> {
     let conn = init_connection()?;
     category_dao::list_categories_with_tags(&conn)
   })
-      .await
+  .await
   {
     Ok(Ok(categories)) => Response::ok(categories),
     Ok(Err(e)) => Response::fail(format!("카테고리 조회 실패: {}", e)),
@@ -64,17 +110,16 @@ pub async fn get_categories() -> Response<Vec<Category>> {
   }
 }
 
-
 /// fso CRUD
 /// fso list를 받아 DB에 fso를 넣음과 동시에 category_ids, tag_ids를 연결시킵니다.
-/// 
-/// category_ids, tag_ids 둘 중 하나만 입력하거나, fso 만을 입력할 수 있게 
+///
+/// category_ids, tag_ids 둘 중 하나만 입력하거나, fso 만을 입력할 수 있게
 /// param을 Option으로 설정하였으며, 이를 통해 유동성있는 insert를 가능하게 합니다.
 #[tauri::command]
 pub async fn insert_fso_async(
   fso_info_list: Vec<FsoInfo>,
   category_id: Option<i64>, // Vec<i64>로 수정
-  tag_id: Option<i64>,       // Vec<i64>로 수정
+  tag_id: Option<i64>,      // Vec<i64>로 수정
 ) -> Response<Vec<i64>> {
   // `category_ids`와 `tag_ids`를 `Vec<i64>`로 받아서 `move` 클로저로 옮길 수 있게 합니다.
   match task::spawn_blocking(move || -> Result<Vec<i64>, rusqlite::Error> {
@@ -82,7 +127,7 @@ pub async fn insert_fso_async(
     let tx = conn.transaction()?; // 트랜잭션 시작
 
     let mut inserted = Vec::with_capacity(fso_info_list.len());
-    
+
     for fso in fso_info_list {
       log::info!("inserting fso name {}", fso.name);
       let cat = fso_dao::insert_fso(&tx, &fso, category_id.as_ref(), tag_id.as_ref())?;
@@ -93,20 +138,20 @@ pub async fn insert_fso_async(
     log::info!("inserted fso_list successfully");
     Ok(inserted)
   })
-      .await
+  .await
   {
     Ok(Ok(inserted)) => {
       log::info!("모든 FSO 삽입 성공");
       Response::ok(inserted)
-    },
+    }
     Ok(Err(e)) => {
       log::error!("데이터베이스 작업 실패: {}", e);
       Response::fail(format!("생성 실패: {}", e))
-    },
+    }
     Err(e) => {
       log::error!("스레드 실패: {}", e);
       Response::fail(format!("스레드 실패: {}", e))
-    },
+    }
   }
 }
 

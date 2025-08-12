@@ -12,7 +12,8 @@ pub fn run() {
       feature::dialog::dialog_open,
       feature::command::insert_categories,
       feature::command::get_categories,
-      feature::command::insert_fso_async
+      feature::command::insert_fso_async,
+      feature::command::process_and_insert_all
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {
