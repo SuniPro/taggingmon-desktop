@@ -6,8 +6,8 @@ use rusqlite::{params_from_iter, Connection, Result};
 pub fn insert_fso(
   conn: &Connection,
   fso: &FsoInfo,
-  category_ids: &[i64],
-  tag_ids: &[i64],
+  category_id: Option<&i64>, // Option<&[i64]>로 수정
+  tag_id: Option<&i64>,      // Option<&[i64]>로 수정
 ) -> Result<i64> {
   conn.execute(
     "INSERT INTO fso (
@@ -28,19 +28,19 @@ pub fn insert_fso(
 
   let fso_id = conn.last_insert_rowid();
 
-  // Category 연결
-  for category_id in category_ids {
+  // category_id가 Some일 때만 실행
+  if let Some(c_id) = category_id {
     conn.execute(
       "INSERT OR IGNORE INTO fso_category (fso_id, category_id) VALUES (?1, ?2)",
-      rusqlite::params![fso_id, category_id],
+      rusqlite::params![fso_id, c_id],
     )?;
   }
 
-  // Tag 연결
-  for tag_id in tag_ids {
+  // tag_id가 Some일 때만 실행
+  if let Some(t_id) = tag_id {
     conn.execute(
       "INSERT OR IGNORE INTO fso_tag (fso_id, tag_id) VALUES (?1, ?2)",
-      rusqlite::params![fso_id, tag_id],
+      rusqlite::params![fso_id, t_id],
     )?;
   }
 
@@ -131,15 +131,15 @@ pub fn get_fsos_by_categories_and_tags(
     params.extend(tag_ids.iter().map(|&id| id.into()));
   }
 
-    // UNION ALL을 사용하여 중복 포함 쿼리 실행
-    let query = query_parts.join(" UNION ALL");
+  // UNION ALL을 사용하여 중복 포함 쿼리 실행
+  let query = query_parts.join(" UNION ALL");
 
-    let mut stmt = conn.prepare(&query)?;
-    let rows = stmt.query_map(params_from_iter(params), map_row_to_fso)?;
+  let mut stmt = conn.prepare(&query)?;
+  let rows = stmt.query_map(params_from_iter(params), map_row_to_fso)?;
 
-    // 중복 제거 후 반환
-    let fsos = rows.collect::<Result<Vec<_>>>()?;
-    Ok(remove_duplicates(fsos))
+  // 중복 제거 후 반환
+  let fsos = rows.collect::<Result<Vec<_>>>()?;
+  Ok(remove_duplicates(fsos))
 }
 
 fn repeat_vars(n: usize) -> String {
