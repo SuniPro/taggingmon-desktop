@@ -1,13 +1,22 @@
-import { memo, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { FsoInfo } from '~/component/Info/fso-info';
+import { memo, useEffect } from 'react';
+import { FsoInfoWidget } from '~/component/Info/fso-info-widget';
 import { Input } from '~/component/ui/input';
 import { ScrollArea } from '~/component/ui/scroll-area';
 import { X } from 'lucide-react';
+import { PlusIcon } from '~/assets/icons/icons';
+import { useDialog } from '~/hook/use-dialog';
+import {
+	AutoCategoriesAndInfoGenerator,
+	createAutoCategories,
+	getAllCategories,
+} from '~/hook/use-category-handle';
+import { insertFsoInDB } from '~/hook/use-fso-handle';
+import type { FsoInfo } from '../../src-tauri/bindings/FsoInfo';
 //
 // export const meta = ({}: Route.MetaArgs) => {
 // 	return [{ title: 'Root Page' }, { name: 'description', content: 'Welcome to React Router!' }];
 // };
+
 const items = [
 	{
 		key: 'new',
@@ -27,43 +36,22 @@ const items = [
 	},
 ];
 const Page = memo(() => {
-	const [dialogOpened, setDialogOpened] = useState(false); // 호출 여부 flag
-	const navigate = useNavigate();
+	const { checkAndOpenDialog, fsoList } = useDialog();
 
-	// useEffect(() => {
-	// 	if (dialogOpened) return; // 이미 열렸으면 무시
+	useEffect(() => {
+		const result = AutoCategoriesAndInfoGenerator(fsoList);
+		const categoriesInputArray = result.map(item => {
+			return { name: item.name, isDefault: item.isDefault };
+		});
+		const targetFso: FsoInfo[] = result.map(info => info.fsoInfo);
+		createAutoCategories(categoriesInputArray).then(r => {
+			r.forEach(category => insertFsoInDB({ fso_info_list: targetFso, category_id: category.id }));
+		});
+	}, [fsoList]);
 
-	// 	const checkAndOpenDialog = async () => {
-	// 		setLoading(true);
-	// 		const folderRes = await typedInvoke('list_folders');
-
-	// 		if (folderRes.status === 'Success' && (folderRes.data?.length ?? 0) === 0) {
-	// 			setDialogOpened(true); // 다이얼로그 실행 플래그 설정
-	// 			const dialogRes = await typedInvoke('dialog_open');
-
-	// 			if (dialogRes.status === 'Success') {
-	// 				const folderPath = dialogRes.data?.[0]?.path;
-	// 				if (folderPath) {
-	// 					await typedInvoke('add_folder_record', { path: folderPath });
-	// 					navigate(`/finder?path=${encodeURIComponent(folderPath)}`);
-	// 				} else {
-	// 					console.warn('❌ 선택된 폴더가 없습니다');
-	// 				}
-	// 			} else {
-	// 				console.error('❌ 다이얼로그 실패:', dialogRes.message);
-	// 			}
-	// 		} else {
-	// 			const existingPath = folderRes.data?.[0]?.path;
-	// 			if (existingPath) {
-	// 				navigate(`/finder?path=${encodeURIComponent(existingPath)}`);
-	// 			}
-	// 		}
-
-	// 		setLoading(false);
-	// 	};
-
-	// 	checkAndOpenDialog();
-	// }, [dialogOpened, navigate]);
+	const viewCategory = () => {
+		getAllCategories().then(r => console.log(r));
+	};
 
 	return (
 		<main className="flex h-full w-full">
@@ -142,6 +130,11 @@ const Page = memo(() => {
 				</div>
 				{/* /태그 필터 */}
 
+				<button onClick={() => checkAndOpenDialog()} className="h-5 w-5 bg-amber-500"></button>
+				<PlusIcon width={40} height={40} />
+
+				<button onClick={viewCategory}>dsfdsf</button>
+
 				{/* 파일 목록 */}
 				<div className="flex h-full gap-2">
 					{/* 좌측 */}
@@ -163,7 +156,7 @@ const Page = memo(() => {
 							</ScrollArea>
 						</div>
 					</div>
-					<FsoInfo></FsoInfo>
+					<FsoInfoWidget />
 
 					{/* /좌측 */}
 
