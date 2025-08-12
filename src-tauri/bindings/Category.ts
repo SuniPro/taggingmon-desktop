@@ -5,4 +5,4 @@ import type { Tag } from "./Tag";
     자녀요소로 Tag를 가지고 있으며.
     카테고리를 호출 시 모든 태그를 함께 호출합니다.
 */
-export type Category = { id: bigint, name: string, is_default: string, tags: Array<Tag> | null, };
+export type Category = { id: bigint, name: string, is_default: boolean, tags: Array<Tag> | null, };

@@ -77,7 +77,7 @@ pub fn list_categories_with_tags(conn: &Connection) -> Result<Vec<Category>> {
                 id,
                 name: row.get("t_name")?,
                 category_id: c_id,
-                is_auto_generated: row.get::<_, bool>("is_auto_generated")?.to_string(),
+                is_auto_generated: row.get::<_, bool>("is_auto_generated").unwrap_or(false),
             };
             category.tags.as_mut().unwrap().push(tag);
         }
