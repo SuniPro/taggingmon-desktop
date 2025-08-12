@@ -7,6 +7,7 @@ import { PlusIcon } from '~/assets/icons/icons';
 import { useDialog } from '~/hook/use-dialog';
 import { getAllCategories } from '~/hook/use-category-handle';
 import { invokeData } from '~/response/response';
+import type { FsoWithLinks } from '../../src-tauri/bindings/FsoWithLinks';
 //
 // export const meta = ({}: Route.MetaArgs) => {
 // 	return [{ title: 'Root Page' }, { name: 'description', content: 'Welcome to React Router!' }];
@@ -30,6 +31,7 @@ const items = [
 		label: 'Delete file',
 	},
 ];
+
 const Page = memo(() => {
 	const { checkAndOpenDialog, fsoList } = useDialog();
 
@@ -59,6 +61,12 @@ const Page = memo(() => {
 
 	const viewCategory = () => {
 		getAllCategories().then(r => console.log(r));
+	};
+
+	const viewFsos = () => {
+		invokeData<FsoWithLinks[]>('get_all_fsos_with_links_async')
+			.then(r => console.log(r))
+			.catch(error => console.error(error));
 	};
 
 	return (
@@ -141,7 +149,12 @@ const Page = memo(() => {
 				<button onClick={() => checkAndOpenDialog()} className="h-5 w-5 bg-amber-500"></button>
 				<PlusIcon width={40} height={40} />
 
-				<button onClick={viewCategory}>dsfdsf</button>
+				<button onClick={viewCategory} className="rounded-md bg-blue-500">
+					저장된 카테고리 확인
+				</button>
+				<button onClick={viewFsos} className="rounded-md bg-amber-500">
+					저장된 모든 FSO 확인
+				</button>
 
 				{/* 파일 목록 */}
 				<div className="flex h-full gap-2">
