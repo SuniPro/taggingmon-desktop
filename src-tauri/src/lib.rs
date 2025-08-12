@@ -13,7 +13,8 @@ pub fn run() {
       feature::command::insert_categories,
       feature::command::get_categories,
       feature::command::insert_fso_async,
-      feature::command::process_and_insert_all
+      feature::command::process_and_insert_all,
+      feature::command::get_all_fsos_with_links_async
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {

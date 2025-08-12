@@ -8,6 +8,7 @@ use tauri::command;
 use crate::feature::category::Category;
 use crate::feature::dao::{category_dao, fso_dao};
 use tokio::task;
+use crate::feature::dto::FsoWithLinks;
 
 #[command]
 pub async fn process_and_insert_all(fso_list: Vec<FsoInfo>) -> Response<Vec<i64>> {
@@ -147,6 +148,33 @@ pub async fn insert_fso_async(
     Ok(Err(e)) => {
       log::error!("데이터베이스 작업 실패: {}", e);
       Response::fail(format!("생성 실패: {}", e))
+    }
+    Err(e) => {
+      log::error!("스레드 실패: {}", e);
+      Response::fail(format!("스레드 실패: {}", e))
+    }
+  }
+}
+
+#[tauri::command]
+pub async fn get_all_fsos_with_links_async() -> Response<Vec<FsoWithLinks>> {
+  // `category_ids`와 `tag_ids`를 `Vec<i64>`로 받아서 `move` 클로저로 옮길 수 있게 합니다.
+  match task::spawn_blocking(move || -> Result<Vec<FsoWithLinks>, rusqlite::Error> {
+    let conn = init_connection()?;
+
+    let result = fso_dao::get_all_fsos_with_links(&conn)?;
+    
+    Ok(result)
+  })
+      .await
+  {
+    Ok(Ok(result)) => {
+      log::info!("모든 FSO 리스트업");
+      Response::ok(result)
+    }
+    Ok(Err(e)) => {
+      log::error!("데이터베이스 작업 실패: {}", e);
+      Response::fail(format!("리스트업 실패: {}", e))
     }
     Err(e) => {
       log::error!("스레드 실패: {}", e);
