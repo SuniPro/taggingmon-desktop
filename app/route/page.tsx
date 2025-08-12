@@ -41,7 +41,7 @@ const Page = memo(() => {
 	useEffect(() => {
 		const result = AutoCategoriesAndInfoGenerator(fsoList);
 		const categoriesInputArray = result.map(item => {
-			return { name: item.name, isDefault: item.isDefault };
+			return { name: item.name, is_default: item.is_default };
 		});
 		const targetFso: FsoInfo[] = result.map(info => info.fsoInfo);
 		createAutoCategories(categoriesInputArray).then(r => {
